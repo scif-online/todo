@@ -1,5 +1,6 @@
 <?php
 $page_title='Список дел';
+$view_ui=true;
 $view_tablesorter=false;
 $iframe=(isset($_GET['iframe'])?'&iframe':'');
 $search_contr_fields=array('name','fullname','phone','email','site','note'); // в каких полях искать контрагента
@@ -43,8 +44,10 @@ if ($func) {$contr=(!empty($_POST['contr'])?intval($_POST['contr']):0);
 
  case 'insert': // добавление
  $name=(!empty($_POST['name'])?htmlclean($_POST['name']):'');
- $db->sql_query('INSERT INTO '.SCIF_PREFIX.'todo SET name="'.$name.'", date_insert="'.$now.'", user_insert="'.$userdata['id'].'", executor="'.$userdata['id'].'", contr="'.$contr.'"');
- echo 'OK';
+  if ($db->sql_query('INSERT INTO '.SCIF_PREFIX.'todo SET name="'.$name.'", date_insert="'.$now.'", user_insert="'.$userdata['id'].'", executor="'.$userdata['id'].'", contr="'.$contr.'", sub=""')) {
+  echo 'OK';
+  } else {  echo 'Ошибка добавления задачи: '.$db->sql_error();
+  }
  break;
 
  case 'items': // список
@@ -129,6 +132,7 @@ $("#items_body").css("opacity", 0.3);
  $("#items_body").html(data);
  $("#items_body").sortable("refresh");
  $("#items_body").css("opacity", 1);
+ '.($iframe?'parent.iframe_autoheight("widget_'.$act.'");':'').'
  });
 }
 

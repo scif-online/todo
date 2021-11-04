@@ -5,15 +5,6 @@ $view_tablesorter=false;
  if (!my_access('act','todolist')) { return; }
  if ($v<=0) { echo error('Не указан код задачи!'); return; }
 
-if (!isset($todo_statuses)) {
-$todo_statuses=array(
-0=>array('name'=>'В процессе'),
-1=>array('name'=>'Завершено','style'=>'background-color: #b9fbb9'),
-2=>array('name'=>'Частично','style'=>'background-color: orange'),
-3=>array('name'=>'Отложено','style'=>'background-color: silver')
-);
-}
-
 $data=array();
 $row=$db->sql_fetch_assoc($db->sql_query('SELECT name, sub
 FROM '.SCIF_PREFIX.'todo
@@ -44,6 +35,14 @@ antiddos_end(false);
 exit;
 }
 
+if (!isset($todo_statuses)) {
+$todo_statuses=array(
+0=>array('name'=>'В процессе'),
+1=>array('name'=>'Завершено','style'=>'background-color: #b9fbb9'),
+2=>array('name'=>'Частично','style'=>'background-color: orange'),
+3=>array('name'=>'Отложено','style'=>'background-color: silver')
+);
+}
 
 $meta='<style>
 body { font-size:0.875rem; line-height:auto }
@@ -67,6 +66,21 @@ table.border td { padding:0 2px; }
 <script>
 var is_changed=false;
 var parent_window=(newwin_ui=="dialogs"?parent:opener);
+
+function filter_status(val) {
+ if (val=="") {
+ $("#items_body tr").show();
+ } else {
+  $("#items_body tr").each(function(){
+  cur_status=$(this).find(`select[name="status[]"]`).val();
+   if (cur_status==val) {
+   $(this).show();
+   } else {
+   $(this).hide();
+   }
+  });
+ }
+}
 
 function add_row(to) {
 new_row=`<tr><td class="dnd">&#8597;</td>`;
@@ -167,7 +181,12 @@ echo '
 <table class="border auto page-block" id="items">
 <thead><tr class="head">
 <th>&nbsp;</th><th align="left">Задача</th>
-<th style="text-align:center">Ст.</th>
+<th style="text-align:center"><select onchange="filter_status(this.value)">
+<option value="">ВСЕ</option>';
+ foreach ($todo_statuses AS $key=>$val) {
+ echo '<option value="'.$key.'">'.$val['name'].'</option>';
+ }
+echo '</select></th>
 <th>&nbsp;</th>
 </tr></thead>
 <tbody id="items_body">';
